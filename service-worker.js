@@ -1,4 +1,4 @@
-const CACHE = "triplog-v3";
+const CACHE = "triplog-v4";
 const ASSETS = [
   "./",
   "./index.html",
