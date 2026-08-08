@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-<title>Trip Log — Flower Mound to Seekonk</title>
+<title>Trip Log — Flower Mound ⇄ Seekonk</title>
 
 <meta name="theme-color" content="#14171A" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -83,7 +83,10 @@ const Plus = (p) => <Icon {...p}><line x1="12" y1="5" x2="12" y2="19"/><line x1=
 const Trash2 = (p) => <Icon {...p}><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></Icon>;
 
 // ---- Route plan: elapsed minutes from departure, planned cumulative miles ----
+// Return leg mirrors the outbound stops/segment distances in reverse, continuing
+// the same odometer/clock (no separate start — see "turnaround" marker below).
 const STOPS = [
+  // outbound: Flower Mound -> Seekonk
   { id: "texarkana", name: "Texarkana, TX", offsetMin: 163, plannedMi: 185 },
   { id: "littlerock", name: "Little Rock, AR", offsetMin: 315, plannedMi: 323 },
   { id: "memphis", name: "Memphis, TN", offsetMin: 466, plannedMi: 460 },
@@ -95,7 +98,20 @@ const STOPS = [
   { id: "morristown", name: "Morristown, NJ", offsetMin: 1535, plannedMi: 1470 },
   { id: "tarrytown", name: "Tarrytown, NY", offsetMin: 1582, plannedMi: 1505 },
   { id: "stamford", name: "Stamford, CT", offsetMin: 1629, plannedMi: 1540 },
-  { id: "seekonk", name: "Seekonk, MA", offsetMin: 1794, plannedMi: 1675, final: true },
+  { id: "seekonk", name: "Seekonk, MA", offsetMin: 1794, plannedMi: 1675, turnaround: true },
+  // return: Seekonk -> Flower Mound
+  { id: "stamford_r", name: "Stamford, CT", offsetMin: 1959, plannedMi: 1810 },
+  { id: "tarrytown_r", name: "Tarrytown, NY", offsetMin: 2006, plannedMi: 1845 },
+  { id: "morristown_r", name: "Morristown, NJ", offsetMin: 2053, plannedMi: 1880 },
+  { id: "harrisburg_r", name: "Harrisburg, PA", offsetMin: 2233, plannedMi: 2030 },
+  { id: "harrisonburg_r", name: "Harrisonburg, VA", offsetMin: 2397, plannedMi: 2175 },
+  { id: "roanoke_r", name: "Roanoke, VA", offsetMin: 2485, plannedMi: 2270 },
+  { id: "knoxville_r", name: "Knoxville, TN", offsetMin: 2718, plannedMi: 2500 },
+  { id: "nashville_r", name: "Nashville, TN", offsetMin: 2907, plannedMi: 2680 },
+  { id: "memphis_r", name: "Memphis, TN", offsetMin: 3122, plannedMi: 2890 },
+  { id: "littlerock_r", name: "Little Rock, AR", offsetMin: 3273, plannedMi: 3027 },
+  { id: "texarkana_r", name: "Texarkana, TX", offsetMin: 3425, plannedMi: 3165 },
+  { id: "flowermound_r", name: "Flower Mound, TX", offsetMin: 3588, plannedMi: 3350, final: true },
 ];
 
 const CURVE = [{ mi: 0, min: 0 }, ...STOPS.map((s) => ({ mi: s.plannedMi, min: s.offsetMin }))];
@@ -364,7 +380,7 @@ function TripLog() {
         <div className="flex items-center justify-between mb-3">
           <div className="inline-flex items-center gap-2 bg-[#2F6F4E] border-2 border-[#EDE8DC]/80 rounded px-3 py-1.5">
             <Route size={14} className="text-[#EDE8DC]" strokeWidth={2.5} />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[#EDE8DC]">Flower Mound → Seekonk</span>
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#EDE8DC]">Flower Mound ⇄ Seekonk</span>
           </div>
           <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#8B8F93] font-semibold">
             {saving ? (<><Loader2 size={12} className="animate-spin" /> Saving</>) : loaded ? (<><Check size={12} className="text-[#2F6F4E]" /> Saved</>) : "Loading…"}
@@ -520,7 +536,8 @@ function TripLog() {
             const showsRevision = !hasArrived && currentDelta !== null && Math.abs(currentDelta) > 5;
 
             return (
-              <div key={stop.id} className={`rounded-xl border overflow-hidden transition-colors ${stop.final ? "border-[#E8A33D]/60 bg-[#1E2226]" : "border-[#33383D] bg-[#1E2226]"}`}>
+              <React.Fragment key={stop.id}>
+              <div className={`rounded-xl border overflow-hidden transition-colors ${stop.final ? "border-[#E8A33D]/60 bg-[#1E2226]" : stop.turnaround ? "border-[#3B7BAF]/60 bg-[#1E2226]" : "border-[#33383D] bg-[#1E2226]"}`}>
                 <button onClick={() => setOpenStop(isOpen ? null : stop.id)} className="w-full flex items-center justify-between px-4 py-3 text-left">
                   <div className="flex items-center gap-3 min-w-0">
                     <div className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold font-mono ${hasArrived ? "bg-[#2F6F4E] text-[#EDE8DC]" : "bg-[#14171A] border border-[#33383D] text-[#8B8F93]"}`}>
@@ -557,6 +574,14 @@ function TripLog() {
                   </div>
                 )}
               </div>
+              {stop.turnaround && (
+                <div className="flex items-center gap-2 py-1">
+                  <div className="flex-1 h-px bg-[#33383D]" />
+                  <span className="text-[10px] uppercase tracking-widest text-[#3B7BAF] font-bold">Turnaround — heading back</span>
+                  <div className="flex-1 h-px bg-[#33383D]" />
+                </div>
+              )}
+              </React.Fragment>
             );
           })}
         </div>

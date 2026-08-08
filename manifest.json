@@ -1,7 +1,7 @@
 {
-  "name": "Trip Log — Flower Mound to Seekonk",
+  "name": "Trip Log — Flower Mound ⇄ Seekonk",
   "short_name": "Trip Log",
-  "description": "Mileage, fuel cost, and pace tracker for the delivery run",
+  "description": "Mileage, fuel cost, and pace tracker for the round-trip delivery run",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
